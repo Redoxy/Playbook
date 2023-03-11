@@ -20,4 +20,12 @@
             authorize: yes
      -
        name: show commands on groupe 1
-       when: "''"
+       when: "'ESPLANADE' in group_names"
+       ios_command:
+         provider: "{{  provider  }}"
+         commands:
+           - show run
+           - show version
+       register: result
+     - debug: msg="{{  result  }}"
+     - copy: content="{{  result | to_nice_yaml  }}" dest="{{playbook_dir}}/log/log_cmd_{{ansible_date_time.iso8601}}_{{inventory_hostname}}.txt"
