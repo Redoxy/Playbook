@@ -1,0 +1,31 @@
+---
+- name : Prechecks
+  hosts: all
+  connection: local
+  gather_facts: yes
+  vars_prompt:
+  - name: "mgm_username"
+    prompt: "Username"
+    private: no
+  - name: "mgmt_password"
+    prompt: "Password"
+  tasks:
+     -
+       name: SYS | Define Provider
+       set_fact:
+         provider:
+            host: "{{  inventory_hostname  }}"
+            username: "{{  mgmt_username  }}"
+            password: "{{  mgmt_password  }}"
+            authorize: yes
+     -
+       name: show commands on groupe 1
+       when: "'ESPLANADE' in group_names"
+       ios_command:
+         provider: "{{  provider  }}"
+         commands:
+           - show run
+           - show version
+       register: result
+     - debug: msg="{{  result  }}"
+     - copy: content="{{  result | to_nice_yaml  }}" dest="{{playbook_dir}}/log/log_cmd_{{ansible_date_time.iso8601}}_{{inventory_hostname}}.txt"
